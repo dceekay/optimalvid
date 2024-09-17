@@ -1,18 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../models/Project');
+const db = require('../config/db'); 
 
-// GET all projects
+// Get all projects
 router.get('/', async (req, res) => {
-  const [rows] = await db.query('SELECT * FROM projects');
-  res.json(rows);
-});
-
-// POST a new project
-router.post('/', async (req, res) => {
-  const { title, description } = req.body;
-  const [result] = await db.query('INSERT INTO projects (title, description) VALUES (?, ?)', [title, description]);
-  res.json({ id: result.insertId, title, description });
+  try {
+    const [projects] = await db.query('SELECT * FROM projects');
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching projects', error });
+  }
 });
 
 module.exports = router;
