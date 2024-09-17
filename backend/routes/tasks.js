@@ -30,22 +30,30 @@ router.get('/projects/:projectId/tasks', async (req, res) => {
 });
 
 
-router.put('/tasks/:id', async (req, res) => {
+// routes/tasks.js
+
+// Update an existing task
+router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { title, description, status, dueDate } = req.body;
-
   try {
-    const task = await Task.findByIdAndUpdate(id, { title, description, status, dueDate }, { new: true });
-    res.status(200).json(task);
+    const updatedTask = await Task.findByIdAndUpdate(
+      id,
+      { title, description, status, dueDate },
+      { new: true }
+    );
+    res.status(200).json(updatedTask);
   } catch (error) {
     res.status(500).json({ message: 'Error updating task', error });
   }
 });
 
-// DELETE: Delete a task
-router.delete('/tasks/:id', async (req, res) => {
-  const { id } = req.params;
 
+// routes/tasks.js
+
+// Delete a task
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
   try {
     await Task.findByIdAndDelete(id);
     res.status(200).json({ message: 'Task deleted successfully' });
