@@ -51,7 +51,6 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
-  // Handle expanding project tasks
   const handleExpandClick = (projectId: number) => {
     setExpanded(expanded === projectId ? null : projectId);
     if (!tasks[projectId]) {
@@ -61,11 +60,18 @@ export default function ProjectsPage() {
 
   // Fetch tasks for a specific project
   const fetchTasks = async (projectId: number) => {
-    const response = await axios.get(`http://localhost:5000/projects/${projectId}/tasks`);
-    setTasks({ ...tasks, [projectId]: response.data });
+    try {
+      const response = await axios.get(`http://localhost:5000/tasks?projectId=${projectId}`);
+      setTasks((prevTasks) => ({
+        ...prevTasks,
+        [projectId]: response.data,
+      }));
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
   };
 
-  // Create a new project with validation
+  // Create a new project 
   const handleProjectSubmit = async () => {
     if (newProject.title === '' || newProject.description === '') {
       alert('Please fill in both the project title and description.');
@@ -82,18 +88,53 @@ export default function ProjectsPage() {
       alert('Please fill in both the task title and description.');
       return;
     }
-    const response = await axios.post(`http://localhost:5000/projects/${projectId}/tasks`, newTask);
-    setTasks({ ...tasks, [projectId]: [...tasks[projectId], response.data] });
-    setNewTask({ title: '', description: '' });
+    try {
+      const response = await axios.post('http://localhost:5000/tasks', {
+        title: newTask.title,
+        description: newTask.description,
+        projectId,  
+      });
+
+      setTasks((prevTasks) => ({
+        ...prevTasks,
+        [projectId]: [...prevTasks[projectId], response.data],
+      }));
+      setNewTask({ title: '', description: '' });  
+    } catch (error) {
+      console.error('Error adding task:', error);
+    }
   };
 
-  // Confirm deletion of project
+  // Handle task status change
+  const handleStatusChange = async (taskId: string, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === 'pending' ? 'completed' : 'pending';
+
+      const response = await axios.put(`http://localhost:5000/tasks/${taskId}`, {
+        status: newStatus,
+      });
+
+      setTasks((prevTasks) => {
+        const updatedTasks = { ...prevTasks };
+        Object.keys(updatedTasks).forEach((projectId) => {
+          updatedTasks[projectId] = updatedTasks[projectId].map((task) =>
+            task._id === taskId ? { ...task, status: newStatus } : task
+          );
+        });
+        return updatedTasks;
+      });
+    } catch (error) {
+      console.error('Error updating task status:', error);
+    }
+  };
+
+  // Confirm delet project
   const handleDeleteProject = (projectId: number) => {
     setDeleteProjectId(projectId);
     setShowDeleteDialog(true);
   };
 
-  // Delete project and its tasks
+  // Delete project and all  related  tasks
   const confirmDeleteProject = async () => {
     await axios.delete(`http://localhost:5000/projects/${deleteProjectId}`);
     setProjects(projects.filter((project) => project.id !== deleteProjectId));
@@ -131,9 +172,14 @@ export default function ProjectsPage() {
                   <Typography paragraph>Tasks:</Typography>
                   <ul>
                     {tasks[project.id]?.map((task) => (
-                      <li key={task._id}>
-                        <Checkbox checked={task.status === 'completed'} />
-                        {task.title} - {task.description}
+                      <li key={task._id} className="flex items-center">
+                        <Checkbox
+                          checked={task.status === 'completed'}
+                          onChange={() => handleStatusChange(task._id, task.status)}
+                        />
+                        <span className={task.status === 'completed' ? 'line-through' : ''}>
+                          {task.title} - {task.description}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -204,3 +250,4 @@ export default function ProjectsPage() {
     </Container>
   );
 }
+

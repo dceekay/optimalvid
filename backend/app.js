@@ -17,11 +17,13 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-const projectRoutes = require('./routes/projects'); 
+const projectRoutes = require('./routes/projects');
 const taskRoutes = require('./routes/tasks');  
 
-app.use('/projects', projectRoutes);  // Projects API
-app.use('/', taskRoutes);  // Tasks API
+
+app.use('/projects', projectRoutes);
+
+app.use('/tasks', taskRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => {
