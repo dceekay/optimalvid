@@ -22,6 +22,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+// Neumorphic style for expanding icon
 const ExpandMoreStyled = styled((props) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
@@ -41,6 +42,30 @@ export default function ProjectsPage() {
   const [newTask, setNewTask] = useState({ title: '', description: '' });
   const [deleteProjectId, setDeleteProjectId] = useState<number | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Toggle between light and dark mode
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.body.classList.add('dark-mode');
+    } else {
+      setIsDarkMode(false);
+      document.body.classList.remove('dark-mode');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    if (!isDarkMode) {
+      document.body.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   // Fetch all projects
   useEffect(() => {
@@ -92,14 +117,14 @@ export default function ProjectsPage() {
       const response = await axios.post('http://localhost:5000/tasks', {
         title: newTask.title,
         description: newTask.description,
-        projectId,  
+        projectId,
       });
 
       setTasks((prevTasks) => ({
         ...prevTasks,
         [projectId]: [...prevTasks[projectId], response.data],
       }));
-      setNewTask({ title: '', description: '' });  
+      setNewTask({ title: '', description: '' });
     } catch (error) {
       console.error('Error adding task:', error);
     }
@@ -128,13 +153,13 @@ export default function ProjectsPage() {
     }
   };
 
-  // Confirm delet project
+  // Confirm delete project
   const handleDeleteProject = (projectId: number) => {
     setDeleteProjectId(projectId);
     setShowDeleteDialog(true);
   };
 
-  // Delete project and all  related  tasks
+  // Delete project and all related tasks
   const confirmDeleteProject = async () => {
     await axios.delete(`http://localhost:5000/projects/${deleteProjectId}`);
     setProjects(projects.filter((project) => project.id !== deleteProjectId));
@@ -144,13 +169,20 @@ export default function ProjectsPage() {
 
   return (
     <Container maxWidth="md">
+      <div style={{ textAlign: 'right', marginBottom: '16px' }}>
+        <Button onClick={toggleDarkMode} className="button-primary">
+          {isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        </Button>
+      </div>
+
       <Typography variant="h4" gutterBottom>
         Projects
       </Typography>
+
       <Grid container spacing={4}>
         {projects.map((project) => (
           <Grid item xs={12} sm={6} md={4} key={project.id}>
-            <Card variant="outlined">
+            <Card variant="outlined" className="card-custom">
               <CardContent>
                 <Typography variant="h5">{project.title}</Typography>
                 <Typography variant="body2">{project.description}</Typography>
@@ -250,4 +282,3 @@ export default function ProjectsPage() {
     </Container>
   );
 }
-

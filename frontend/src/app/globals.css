@@ -1,14 +1,14 @@
-
 :root {
-  --primary-color: #4C5DF1; 
-  --secondary-color: #8692A6; 
-  --background-color: #F4F6F9; 
+  --primary-color: #4C5DF1;
+  --secondary-color: #8692A6;
+  --background-color: #F4F6F9;
   --card-bg-color: #ffffff;
-  --card-hover-bg: #f0f2f5; 
-  --success-color: #28C76F; 
+  --text-color: #333333;
+  --heading-color: #2C3E50;
+  --box-shadow-light: rgba(255, 255, 255, 0.7);
+  --box-shadow-dark: rgba(0, 0, 0, 0.15);
+  --success-color: #28C76F;
   --error-color: #EA5455;
-  --text-color: #333333; 
-  --heading-color: #2C3E50; 
   --padding-large: 32px;
   --padding-medium: 24px;
   --padding-small: 16px;
@@ -16,12 +16,21 @@
   --margin-large: 24px;
   --margin-medium: 16px;
   --margin-small: 8px;
+
+  /* Dark Mode Variables */
+  --dark-bg-color: #181818;
+  --dark-card-bg-color: #242424;
+  --dark-text-color: #E0E0E0;
+  --dark-heading-color: #ffffff;
+  --dark-shadow-light: rgba(255, 255, 255, 0.1);
+  --dark-shadow-dark: rgba(0, 0, 0, 0.3);
 }
 
 body {
   background-color: var(--background-color);
   color: var(--text-color);
   font-family: 'Geist Sans', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -29,96 +38,75 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: var(--margin-medium);
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--padding-medium);
-}
-
-/* Button Styling */
+/* Neumorphic Button */
 .button-primary {
-  background-color: var(--primary-color);
-  color: white;
+  background-color: var(--card-bg-color);
+  color: var(--primary-color);
   padding: var(--padding-small) var(--padding-medium);
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 1.1rem;
-  transition: all 0.3s ease;
   width: 100%; 
   margin-top: var(--margin-medium);
+  box-shadow: 5px 5px 10px var(--box-shadow-dark), -5px -5px 10px var(--box-shadow-light);
+  transition: all 0.3s ease;
 }
 
 .button-primary:hover {
-  background-color: #3B4CD0;
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(76, 93, 241, 0.3);
+  box-shadow: 8px 8px 16px var(--box-shadow-dark), -8px -8px 16px var(--box-shadow-light);
 }
 
-/* Card Styling */
+/* Neumorphic Card */
 .card-custom {
   background-color: var(--card-bg-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 5px 5px 10px var(--box-shadow-dark), -5px -5px 10px var(--box-shadow-light);
   border-radius: 12px;
-  transition: box-shadow 0.3s ease, background-color 0.3s ease;
-  padding: var(--padding-medium); 
+  padding: var(--padding-medium);
+  transition: all 0.3s ease;
 }
 
 .card-custom:hover {
-  background-color: var(--card-hover-bg);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 8px 8px 16px var(--box-shadow-dark), -8px -8px 16px var(--box-shadow-light);
 }
 
-.card-content-spacious {
-  padding: var(--padding-medium);
-}
-
-
+/* Neumorphic Input Fields */
 .input-field {
+  background-color: var(--card-bg-color);
+  box-shadow: inset 5px 5px 10px var(--box-shadow-dark), inset -5px -5px 10px var(--box-shadow-light);
   border-radius: 8px;
-  border: 1px solid var(--secondary-color);
+  border: none;
   padding: var(--padding-small);
-  width: 100%;
   font-size: 1rem;
   margin-bottom: var(--margin-small);
-  transition: border 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .input-field:focus {
-  border-color: var(--primary-color);
+  box-shadow: inset 3px 3px 5px var(--box-shadow-dark), inset -3px -3px 5px var(--box-shadow-light);
 }
 
-
-.text-primary {
-  color: var(--primary-color);
+/* Dark Mode Styles */
+body.dark-mode {
+  background-color: var(--dark-bg-color);
+  color: var(--dark-text-color);
 }
 
-.text-secondary {
-  color: var(--secondary-color);
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
+  color: var(--dark-heading-color);
 }
 
-.text-large {
-  font-size: 1.3rem;
-  font-weight: bold;
+body.dark-mode .button-primary {
+  background-color: var(--dark-card-bg-color);
+  color: var(--dark-text-color);
+  box-shadow: 5px 5px 10px var(--dark-shadow-dark), -5px -5px 10px var(--dark-shadow-light);
 }
 
-
-.collapse-enter {
-  opacity: 0;
-  transform: scaleY(0);
+body.dark-mode .card-custom {
+  background-color: var(--dark-card-bg-color);
+  box-shadow: 5px 5px 10px var(--dark-shadow-dark), -5px -5px 10px var(--dark-shadow-light);
 }
 
-.collapse-enter-active {
-  opacity: 1;
-  transform: scaleY(1);
-  transition: all 0.3s ease;
-}
-
-.collapse-exit {
-  opacity: 1;
-  transform: scaleY(1);
-}
-
-.collapse-exit-active {
-  opacity: 0;
-  transform: scaleY(0);
-  transition: all 0.3s ease;
+body.dark-mode .input-field {
+  background-color: var(--dark-card-bg-color);
+  box-shadow: inset 5px 5px 10px var(--dark-shadow-dark), inset -5px -5px 10px var(--dark-shadow-light);
 }
