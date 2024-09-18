@@ -13,11 +13,15 @@ import {
   Checkbox,
   Collapse,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-// Styled Icon for Collapse
 const ExpandMoreStyled = styled((props) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
@@ -33,9 +37,12 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [tasks, setTasks] = useState({});
-  const [newTask, setNewTask] = useState({ title: '', description: '' });
   const [newProject, setNewProject] = useState({ title: '', description: '' });
+  const [newTask, setNewTask] = useState({ title: '', description: '' });
+  const [deleteProjectId, setDeleteProjectId] = useState<number | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+  // Fetch all projects
   useEffect(() => {
     const fetchProjects = async () => {
       const response = await axios.get('http://localhost:5000/projects');
@@ -44,11 +51,7 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
-  const fetchTasks = async (projectId: number) => {
-    const response = await axios.get(`http://localhost:5000/projects/${projectId}/tasks`);
-    setTasks({ ...tasks, [projectId]: response.data });
-  };
-
+  // Handle expanding project tasks
   const handleExpandClick = (projectId: number) => {
     setExpanded(expanded === projectId ? null : projectId);
     if (!tasks[projectId]) {
@@ -56,68 +59,65 @@ export default function ProjectsPage() {
     }
   };
 
-  const handleTaskSubmit = async (projectId: number) => {
-    const response = await axios.post(`http://localhost:5000/projects/${projectId}/tasks`, newTask);
-    setTasks({ ...tasks, [projectId]: [...tasks[projectId], response.data] });
-    setNewTask({ title: '', description: '' });
+  // Fetch tasks for a specific project
+  const fetchTasks = async (projectId: number) => {
+    const response = await axios.get(`http://localhost:5000/projects/${projectId}/tasks`);
+    setTasks({ ...tasks, [projectId]: response.data });
   };
 
+  // Create a new project with validation
   const handleProjectSubmit = async () => {
+    if (newProject.title === '' || newProject.description === '') {
+      alert('Please fill in both the project title and description.');
+      return;
+    }
     const response = await axios.post('http://localhost:5000/projects', newProject);
     setProjects([...projects, response.data]);
     setNewProject({ title: '', description: '' });
   };
 
+  // Handle task submission
+  const handleTaskSubmit = async (projectId: number) => {
+    if (newTask.title === '' || newTask.description === '') {
+      alert('Please fill in both the task title and description.');
+      return;
+    }
+    const response = await axios.post(`http://localhost:5000/projects/${projectId}/tasks`, newTask);
+    setTasks({ ...tasks, [projectId]: [...tasks[projectId], response.data] });
+    setNewTask({ title: '', description: '' });
+  };
+
+  // Confirm deletion of project
+  const handleDeleteProject = (projectId: number) => {
+    setDeleteProjectId(projectId);
+    setShowDeleteDialog(true);
+  };
+
+  // Delete project and its tasks
+  const confirmDeleteProject = async () => {
+    await axios.delete(`http://localhost:5000/projects/${deleteProjectId}`);
+    setProjects(projects.filter((project) => project.id !== deleteProjectId));
+    setShowDeleteDialog(false);
+    setDeleteProjectId(null);
+  };
+
   return (
-    <Container maxWidth="md" className="container">
-      {/* Header */}
-      <Typography variant="h4" gutterBottom className="text-primary font-bold mt-4 text-center">
-        Project Management
+    <Container maxWidth="md">
+      <Typography variant="h4" gutterBottom>
+        Projects
       </Typography>
-
-      {/* New Project Form */}
-      <Card variant="outlined" className="card-custom mb-6">
-        <CardContent className="card-content-spacious">
-          <Typography variant="h5" className="font-semibold text-dark mb-3">Create New Project</Typography>
-          <TextField
-            label="Project Title"
-            value={newProject.title}
-            onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-            fullWidth
-            className="input-field"
-          />
-          <TextField
-            label="Project Description"
-            value={newProject.description}
-            onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-            fullWidth
-            multiline
-            rows={2}
-            className="input-field"
-          />
-          <Button
-            variant="contained"
-            className="button-primary"
-            onClick={handleProjectSubmit}
-          >
-            Add Project
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Projects List */}
       <Grid container spacing={4}>
         {projects.map((project) => (
-          <Grid item xs={12} sm={6} md={6} key={project.id}>
-            <Card variant="outlined" className="card-custom shadow-md hover:shadow-lg transition-shadow duration-300">
-              <CardContent className="card-content-spacious">
-                <Typography variant="h5" className="font-semibold text-dark text-large">
-                  {project.title}
-                </Typography>
-                <Typography variant="body2" className="text-secondary mt-2">
-                  {project.description}
-                </Typography>
+          <Grid item xs={12} sm={6} md={4} key={project.id}>
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h5">{project.title}</Typography>
+                <Typography variant="body2">{project.description}</Typography>
               </CardContent>
+
+              <IconButton onClick={() => handleDeleteProject(project.id)}>
+                <DeleteIcon />
+              </IconButton>
 
               <ExpandMoreStyled
                 expand={expanded === project.id}
@@ -126,9 +126,9 @@ export default function ProjectsPage() {
                 <ExpandMoreIcon />
               </ExpandMoreStyled>
 
-              <Collapse in={expanded === project.id} timeout="auto" unmountOnExit className="collapse-enter collapse-exit">
+              <Collapse in={expanded === project.id} timeout="auto" unmountOnExit>
                 <CardContent>
-                  <Typography paragraph className="text-primary">Tasks:</Typography>
+                  <Typography paragraph>Tasks:</Typography>
                   <ul>
                     {tasks[project.id]?.map((task) => (
                       <li key={task._id}>
@@ -138,14 +138,12 @@ export default function ProjectsPage() {
                     ))}
                   </ul>
 
-                  {/* New Task Form */}
                   <Typography paragraph>Create New Task:</Typography>
                   <TextField
                     label="Task Title"
                     value={newTask.title}
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                     fullWidth
-                    className="input-field"
                   />
                   <TextField
                     label="Task Description"
@@ -154,9 +152,9 @@ export default function ProjectsPage() {
                     fullWidth
                     multiline
                     rows={2}
-                    className="input-field"
+                    className="mt-2"
                   />
-                  <Button variant="contained" className="button-primary" onClick={() => handleTaskSubmit(project.id)}>
+                  <Button variant="contained" onClick={() => handleTaskSubmit(project.id)} className="mt-2">
                     Add Task
                   </Button>
                 </CardContent>
@@ -165,6 +163,44 @@ export default function ProjectsPage() {
           </Grid>
         ))}
       </Grid>
+
+      {/* New Project Form */}
+      <div style={{ marginTop: '20px' }}>
+        <Typography variant="h5">Create New Project</Typography>
+        <TextField
+          label="Project Title"
+          value={newProject.title}
+          onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+          fullWidth
+          className="mt-2"
+        />
+        <TextField
+          label="Project Description"
+          value={newProject.description}
+          onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+          fullWidth
+          multiline
+          rows={2}
+          className="mt-2"
+        />
+        <Button variant="contained" onClick={handleProjectSubmit} className="mt-2">
+          Add Project
+        </Button>
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onClose={() => setShowDeleteDialog(false)}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this project and all its tasks?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+          <Button color="error" onClick={confirmDeleteProject}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

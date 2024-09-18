@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/db'); // MySQL connection
+const db = require('../config/db');
+const Task = require('../models/Task'); 
 
 // Get all projects
 router.get('/', async (req, res) => {
@@ -37,16 +38,21 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete a project
+// Delete a project and associated tasks
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const query = 'DELETE FROM projects WHERE id = ?';
-    await db.query(query, [id]);
-    res.status(200).json({ message: 'Project deleted successfully' });
+    // Delete the project from MySQL
+    await db.query('DELETE FROM projects WHERE id = ?', [id]);
+
+    // Convert MySQL project ID to string before querying MongoDB
+    await Task.deleteMany({ projectId: String(id) });
+
+    res.status(200).json({ message: 'Project and associated tasks deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting project', error });
+    res.status(500).json({ message: 'Error deleting project and tasks', error });
   }
 });
+
 
 module.exports = router;
