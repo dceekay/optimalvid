@@ -2,12 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Grid, Card, CardContent, Typography, TextField, Button, Checkbox, IconButton, Collapse } from '@mui/material';
+import {
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Checkbox,
+  Collapse,
+  IconButton,
+} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { styled } from '@mui/material/styles';
 
-
+// Styled Icon for Collapse
 const ExpandMoreStyled = styled((props) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
@@ -24,6 +34,7 @@ export default function ProjectsPage() {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [tasks, setTasks] = useState({});
   const [newTask, setNewTask] = useState({ title: '', description: '' });
+  const [newProject, setNewProject] = useState({ title: '', description: '' });
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -33,16 +44,16 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
+  const fetchTasks = async (projectId: number) => {
+    const response = await axios.get(`http://localhost:5000/projects/${projectId}/tasks`);
+    setTasks({ ...tasks, [projectId]: response.data });
+  };
+
   const handleExpandClick = (projectId: number) => {
     setExpanded(expanded === projectId ? null : projectId);
     if (!tasks[projectId]) {
       fetchTasks(projectId);
     }
-  };
-
-  const fetchTasks = async (projectId: number) => {
-    const response = await axios.get(`http://localhost:5000/projects/${projectId}/tasks`);
-    setTasks({ ...tasks, [projectId]: response.data });
   };
 
   const handleTaskSubmit = async (projectId: number) => {
@@ -51,33 +62,61 @@ export default function ProjectsPage() {
     setNewTask({ title: '', description: '' });
   };
 
-  const handleTaskUpdate = async (taskId: string, updatedTask: any) => {
-    await axios.put(`http://localhost:5000/tasks/${taskId}`, updatedTask);
-    fetchTasks(expanded);
-  };
-
-  const handleTaskDelete = async (taskId: string) => {
-    await axios.delete(`http://localhost:5000/tasks/${taskId}`);
-    fetchTasks(expanded);
-  };
-
-  const toggleTaskCompletion = (task: any) => {
-    const updatedTask = { ...task, status: task.status === 'completed' ? 'pending' : 'completed' };
-    handleTaskUpdate(task._id, updatedTask);
+  const handleProjectSubmit = async () => {
+    const response = await axios.post('http://localhost:5000/projects', newProject);
+    setProjects([...projects, response.data]);
+    setNewProject({ title: '', description: '' });
   };
 
   return (
-    <Container maxWidth="md">
-      <Typography variant="h4" gutterBottom>
-        Projects
+    <Container maxWidth="md" className="container">
+      {/* Header */}
+      <Typography variant="h4" gutterBottom className="text-primary font-bold mt-4 text-center">
+        Project Management
       </Typography>
+
+      {/* New Project Form */}
+      <Card variant="outlined" className="card-custom mb-6">
+        <CardContent className="card-content-spacious">
+          <Typography variant="h5" className="font-semibold text-dark mb-3">Create New Project</Typography>
+          <TextField
+            label="Project Title"
+            value={newProject.title}
+            onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+            fullWidth
+            className="input-field"
+          />
+          <TextField
+            label="Project Description"
+            value={newProject.description}
+            onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+            fullWidth
+            multiline
+            rows={2}
+            className="input-field"
+          />
+          <Button
+            variant="contained"
+            className="button-primary"
+            onClick={handleProjectSubmit}
+          >
+            Add Project
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Projects List */}
       <Grid container spacing={4}>
         {projects.map((project) => (
-          <Grid item xs={12} sm={6} md={4} key={project.id}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h5">{project.title}</Typography>
-                <Typography variant="body2">{project.description}</Typography>
+          <Grid item xs={12} sm={6} md={6} key={project.id}>
+            <Card variant="outlined" className="card-custom shadow-md hover:shadow-lg transition-shadow duration-300">
+              <CardContent className="card-content-spacious">
+                <Typography variant="h5" className="font-semibold text-dark text-large">
+                  {project.title}
+                </Typography>
+                <Typography variant="body2" className="text-secondary mt-2">
+                  {project.description}
+                </Typography>
               </CardContent>
 
               <ExpandMoreStyled
@@ -87,41 +126,26 @@ export default function ProjectsPage() {
                 <ExpandMoreIcon />
               </ExpandMoreStyled>
 
-              <CardContent>
-                <Collapse in={expanded === project.id} timeout="auto" unmountOnExit>
-                  <Typography paragraph>Tasks:</Typography>
+              <Collapse in={expanded === project.id} timeout="auto" unmountOnExit className="collapse-enter collapse-exit">
+                <CardContent>
+                  <Typography paragraph className="text-primary">Tasks:</Typography>
                   <ul>
                     {tasks[project.id]?.map((task) => (
                       <li key={task._id}>
-                        <Checkbox
-                          checked={task.status === 'completed'}
-                          onChange={() => toggleTaskCompletion(task)}
-                        />
-                        <TextField
-                          value={task.title}
-                          onChange={(e) => handleTaskUpdate(task._id, { ...task, title: e.target.value })}
-                        />
-                        <TextField
-                          value={task.description}
-                          onChange={(e) => handleTaskUpdate(task._id, { ...task, description: e.target.value })}
-                          fullWidth
-                          multiline
-                          rows={2}
-                          className="mt-2"
-                        />
-                        <IconButton onClick={() => handleTaskDelete(task._id)}>
-                          <DeleteIcon />
-                        </IconButton>
+                        <Checkbox checked={task.status === 'completed'} />
+                        {task.title} - {task.description}
                       </li>
                     ))}
                   </ul>
 
+                  {/* New Task Form */}
                   <Typography paragraph>Create New Task:</Typography>
                   <TextField
                     label="Task Title"
                     value={newTask.title}
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                     fullWidth
+                    className="input-field"
                   />
                   <TextField
                     label="Task Description"
@@ -130,13 +154,13 @@ export default function ProjectsPage() {
                     fullWidth
                     multiline
                     rows={2}
-                    className="mt-2"
+                    className="input-field"
                   />
-                  <Button variant="contained" onClick={() => handleTaskSubmit(project.id)} className="mt-2">
+                  <Button variant="contained" className="button-primary" onClick={() => handleTaskSubmit(project.id)}>
                     Add Task
                   </Button>
-                </Collapse>
-              </CardContent>
+                </CardContent>
+              </Collapse>
             </Card>
           </Grid>
         ))}

@@ -1,27 +1,124 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --primary-color: #4C5DF1; 
+  --secondary-color: #8692A6; 
+  --background-color: #F4F6F9; 
+  --card-bg-color: #ffffff;
+  --card-hover-bg: #f0f2f5; 
+  --success-color: #28C76F; 
+  --error-color: #EA5455;
+  --text-color: #333333; 
+  --heading-color: #2C3E50; 
+  --padding-large: 32px;
+  --padding-medium: 24px;
+  --padding-small: 16px;
+  --padding-xs: 12px;
+  --margin-large: 24px;
+  --margin-medium: 16px;
+  --margin-small: 8px;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: 'Geist Sans', sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+h1, h2, h3, h4, h5, h6 {
+  color: var(--heading-color);
+  margin-bottom: var(--margin-medium);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--padding-medium);
+}
+
+/* Button Styling */
+.button-primary {
+  background-color: var(--primary-color);
+  color: white;
+  padding: var(--padding-small) var(--padding-medium);
+  border-radius: 8px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  width: 100%; 
+  margin-top: var(--margin-medium);
+}
+
+.button-primary:hover {
+  background-color: #3B4CD0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(76, 93, 241, 0.3);
+}
+
+/* Card Styling */
+.card-custom {
+  background-color: var(--card-bg-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  padding: var(--padding-medium); 
+}
+
+.card-custom:hover {
+  background-color: var(--card-hover-bg);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-content-spacious {
+  padding: var(--padding-medium);
+}
+
+
+.input-field {
+  border-radius: 8px;
+  border: 1px solid var(--secondary-color);
+  padding: var(--padding-small);
+  width: 100%;
+  font-size: 1rem;
+  margin-bottom: var(--margin-small);
+  transition: border 0.3s ease;
+}
+
+.input-field:focus {
+  border-color: var(--primary-color);
+}
+
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.text-secondary {
+  color: var(--secondary-color);
+}
+
+.text-large {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+
+.collapse-enter {
+  opacity: 0;
+  transform: scaleY(0);
+}
+
+.collapse-enter-active {
+  opacity: 1;
+  transform: scaleY(1);
+  transition: all 0.3s ease;
+}
+
+.collapse-exit {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.collapse-exit-active {
+  opacity: 0;
+  transform: scaleY(0);
+  transition: all 0.3s ease;
 }
