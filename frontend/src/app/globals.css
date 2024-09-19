@@ -110,3 +110,73 @@ body.dark-mode .input-field {
   background-color: var(--dark-card-bg-color);
   box-shadow: inset 5px 5px 10px var(--dark-shadow-dark), inset -5px -5px 10px var(--dark-shadow-light);
 }
+
+
+/* Light Mode Text */
+.toggle-heading {
+  color: var(--heading-color);
+}
+
+.toggle-text {
+  color: var(--text-color);
+}
+
+.toggle-input input,
+.toggle-input textarea {
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+}
+
+/* Dark Mode Specifics */
+body.dark-mode .toggle-heading {
+  color: var(--dark-heading-color);
+}
+
+body.dark-mode .toggle-text,
+body.dark-mode .toggle-input input,
+body.dark-mode .toggle-input textarea {
+  color: var(--dark-text-color);
+  background-color: var(--dark-card-bg-color);
+}
+
+body.dark-mode .toggle-input input:focus,
+body.dark-mode .toggle-input textarea:focus {
+  border-color: var(--primary-color);
+}
+
+
+/* Light mode placeholder */
+.toggle-input::placeholder {
+  color: #a0a0a0;
+}
+
+/* Dark mode placeholder */
+.dark-mode .toggle-input::placeholder {
+  color: #e0e0e0;
+}
+
+.trello-board {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px;
+}
+
+.trello-list {
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.trello-card {
+  background: var(--card-bg-color);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--box-shadow);
+  transition: box-shadow 0.3s ease;
+}
+
+.trello-card:hover {
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.15);
+}

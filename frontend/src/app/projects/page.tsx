@@ -21,6 +21,8 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // FontAwesome
+import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'; // Moon and Sun Icons
 
 // Neumorphic style for expanding icon
 const ExpandMoreStyled = styled((props) => {
@@ -96,7 +98,7 @@ export default function ProjectsPage() {
     }
   };
 
-  // Create a new project 
+  // Create a new project
   const handleProjectSubmit = async () => {
     if (newProject.title === '' || newProject.description === '') {
       alert('Please fill in both the project title and description.');
@@ -168,14 +170,20 @@ export default function ProjectsPage() {
   };
 
   return (
-    <Container maxWidth="md">
-      <div style={{ textAlign: 'right', marginBottom: '16px' }}>
-        <Button onClick={toggleDarkMode} className="button-primary">
-          {isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-        </Button>
-      </div>
+    <Container maxWidth="lg" className="container-custom">
+      <header className="header">
+        <Typography variant="h4" className="toggle-heading">
+          Project Manager
+        </Typography>
+        <IconButton onClick={toggleDarkMode}>
+          <FontAwesomeIcon
+            icon={isDarkMode ? faSun : faMoon}
+            style={{ color: isDarkMode ? '#FFD700' : '#4C5DF1', fontSize: '1.5rem' }}
+          />
+        </IconButton>
+      </header>
 
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h5" gutterBottom className="toggle-heading">
         Projects
       </Typography>
 
@@ -184,24 +192,25 @@ export default function ProjectsPage() {
           <Grid item xs={12} sm={6} md={4} key={project.id}>
             <Card variant="outlined" className="card-custom">
               <CardContent>
-                <Typography variant="h5">{project.title}</Typography>
-                <Typography variant="body2">{project.description}</Typography>
+                <Typography variant="h6" className="toggle-heading">
+                  {project.title}
+                </Typography>
+                <Typography variant="body2" className="toggle-text">
+                  {project.description}
+                </Typography>
               </CardContent>
 
               <IconButton onClick={() => handleDeleteProject(project.id)}>
                 <DeleteIcon />
               </IconButton>
 
-              <ExpandMoreStyled
-                expand={expanded === project.id}
-                onClick={() => handleExpandClick(project.id)}
-              >
+              <ExpandMoreStyled expand={expanded === project.id} onClick={() => handleExpandClick(project.id)}>
                 <ExpandMoreIcon />
               </ExpandMoreStyled>
 
               <Collapse in={expanded === project.id} timeout="auto" unmountOnExit>
                 <CardContent>
-                  <Typography paragraph>Tasks:</Typography>
+                  <Typography paragraph className="toggle-heading">Tasks:</Typography>
                   <ul>
                     {tasks[project.id]?.map((task) => (
                       <li key={task._id} className="flex items-center">
@@ -209,19 +218,20 @@ export default function ProjectsPage() {
                           checked={task.status === 'completed'}
                           onChange={() => handleStatusChange(task._id, task.status)}
                         />
-                        <span className={task.status === 'completed' ? 'line-through' : ''}>
+                        <span className={task.status === 'completed' ? 'line-through' : 'toggle-text'}>
                           {task.title} - {task.description}
                         </span>
                       </li>
                     ))}
                   </ul>
 
-                  <Typography paragraph>Create New Task:</Typography>
+                  <Typography paragraph className="toggle-heading">Create New Task:</Typography>
                   <TextField
                     label="Task Title"
                     value={newTask.title}
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                     fullWidth
+                    className="toggle-input"
                   />
                   <TextField
                     label="Task Description"
@@ -230,7 +240,7 @@ export default function ProjectsPage() {
                     fullWidth
                     multiline
                     rows={2}
-                    className="mt-2"
+                    className="mt-2 toggle-input"
                   />
                   <Button variant="contained" onClick={() => handleTaskSubmit(project.id)} className="mt-2">
                     Add Task
@@ -244,26 +254,28 @@ export default function ProjectsPage() {
 
       {/* New Project Form */}
       <div style={{ marginTop: '20px' }}>
-        <Typography variant="h5">Create New Project</Typography>
-        <TextField
-          label="Project Title"
-          value={newProject.title}
-          onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-          fullWidth
-          className="mt-2"
-        />
-        <TextField
-          label="Project Description"
-          value={newProject.description}
-          onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-          fullWidth
-          multiline
-          rows={2}
-          className="mt-2"
-        />
-        <Button variant="contained" onClick={handleProjectSubmit} className="mt-2">
-          Add Project
-        </Button>
+        <Typography variant="h5" className="toggle-heading">Create New Project</Typography>
+        <form className="new-project-form">
+          <TextField
+            label="Project Title"
+            value={newProject.title}
+            onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+            fullWidth
+            className="mt-2 toggle-input"
+          />
+          <TextField
+            label="Project Description"
+            value={newProject.description}
+            onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+            fullWidth
+            multiline
+            rows={2}
+            className="mt-2 toggle-input"
+          />
+          <Button variant="contained" onClick={handleProjectSubmit} className="button-primary">
+            Add Project
+          </Button>
+        </form>
       </div>
 
       {/* Delete Confirmation Dialog */}
